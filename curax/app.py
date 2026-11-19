@@ -25,15 +25,27 @@ CATEGORIES = ["Lab Report", "Prescription", "Diagnostic Report", "Blood Test",
               "X-Ray", "MRI", "ECG", "Discharge Summary", "Other"]
 
 def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    # Vercel's deployment directory is read-only. /tmp is writable but ephemeral.
+    is_vercel = bool(os.getenv("VERCEL"))
+    instance_dir = "/tmp/curax_instance" if is_vercel else None
+    if instance_dir:
+        app = Flask(__name__, instance_path=instance_dir)
+    else:
+        app = Flask(__name__, instance_relative_config=True)
+
+    secret = os.getenv("SECRET_KEY") or os.getenv("FLASK_SECRET_KEY")
+    if is_vercel and not secret:
+        raise RuntimeError("Set SECRET_KEY in Vercel Environment Variables.")
     app.config.update(
-        SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "dev-only-change-this-secret"),
-        DATABASE_PATH=os.getenv("DATABASE_PATH", str(Path(app.instance_path) / "curax.db")),
-        UPLOAD_FOLDER=os.getenv("UPLOAD_FOLDER", str(Path(app.root_path) / "uploads")),
+        SECRET_KEY=secret or "dev-only-change-this-secret",
+        DATABASE_PATH=os.getenv("DATABASE_PATH") or str(Path(app.instance_path) / "curax.db"),
+        UPLOAD_FOLDER=os.getenv("UPLOAD_FOLDER") or (
+            "/tmp/curax_uploads" if is_vercel else str(Path(app.root_path) / "uploads")
+        ),
         MAX_CONTENT_LENGTH=int(os.getenv("MAX_CONTENT_LENGTH", MAX_FILE_SIZE)),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=os.getenv("COOKIE_SECURE", "0") == "1",
+        SESSION_COOKIE_SECURE=is_vercel or os.getenv("COOKIE_SECURE", "0") == "1",
     )
     if test_config:
         app.config.update(test_config)
