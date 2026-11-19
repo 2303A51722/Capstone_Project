@@ -1,9 +1,29 @@
+# Python virtual environments
 .venv/
 venv/
+
+# Python cache
 __pycache__/
 *.py[cod]
+.pytest_cache/
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# SQLite databases
 instance/*.db
+*.db
+*.sqlite3
+
+# Uploaded medical files
 uploads/*
 !uploads/.gitkeep
-.pytest_cache/
+
+# Vercel
+.vercel/
+
+# IDE files
+.vscode/
+.idea/
