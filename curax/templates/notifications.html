@@ -1,0 +1,3 @@
+{% extends "dashboard_base.html" %}{% block title %}Notifications{% endblock %}{% block dash_title %}Notifications{% endblock %}{% block dashboard_content %}
+<section class="panel"><div class="panel-head"><div><h3>Activity updates</h3><p>Your latest account notifications. Opening this page marks them as read.</p></div></div>{% for n in notifications %}<div class="notification-row"><span class="notification-icon"><i class="fa-regular fa-bell"></i></span><div><p>{{ n.message }}</p><small>{{ n.created_at }}</small></div></div>{% else %}<div class="empty-state"><i class="fa-regular fa-bell-slash"></i><p>You have no notifications.</p></div>{% endfor %}</section>
+{% endblock %}
